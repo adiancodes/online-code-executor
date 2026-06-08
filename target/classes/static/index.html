@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execute Your Code — Python Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ─── Palette ─── */
+        :root {
+            --cream: #faf7f2;
+            --cream-warm: #f5f0e8;
+            --panel-bg: #ffffff;
+            --panel-alt: #faf8f5;
+            --surface-raised: #f0ece4;
+            --divider: #e2ddd4;
+            --divider-subtle: rgba(180, 172, 158, 0.35);
+            --brass: #8b7332;
+            --brass-dim: #a08c4e;
+            --brass-glow: rgba(139, 115, 50, 0.06);
+            --teal: #1a8a74;
+            --teal-dim: #218f78;
+            --teal-glow: rgba(26, 138, 116, 0.08);
+            --green-dot: #2f9e5a;
+            --red-soft: #c44d52;
+            --text-dark: #2c2a26;
+            --text-body: #4a4640;
+            --text-dim: #8a847a;
+            --text-output: #5a554e;
+            --shadow-deep: 0 6px 28px rgba(60, 50, 30, 0.08), 0 2px 6px rgba(60, 50, 30, 0.05);
+            --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.03);
+        }
+
+        body {
+            font-family: 'DM Sans', 'Segoe UI', sans-serif;
+            background: var(--cream);
+            /* subtle warmth variation — not perfectly flat */
+            background-image:
+                radial-gradient(ellipse 80% 60% at 25% 15%, rgba(245, 238, 225, 0.7) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 50% at 80% 85%, rgba(240, 232, 218, 0.5) 0%, transparent 60%);
+            color: var(--text-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ═══════════════════════════════════════
+           HEADER — asymmetric, branded
+           ═══════════════════════════════════════ */
+        header {
+            padding: 22px 36px 18px 30px;
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            border-bottom: 1px solid var(--divider);
+            background: linear-gradient(180deg, #fffdf9 0%, var(--cream) 100%);
+        }
+
+        /* Hand-drawn beaker icon via inline SVG */
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 21px;
+            font-weight: 600;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+            line-height: 1;
+            padding-bottom: 1px;
+        }
+
+        .brand-name span {
+            color: var(--brass);
+            font-weight: 700;
+        }
+
+        .header-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-left: 6px;
+            padding-bottom: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .header-spacer {
+            flex: 1;
+        }
+
+        .header-lang {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--teal);
+            background: var(--teal-glow);
+            border: 1px solid rgba(62, 201, 176, 0.15);
+            border-radius: 6px;
+            padding: 5px 14px;
+            margin-bottom: 1px;
+        }
+
+        /* ═══════════════════════════════════════
+           CONSOLE PANEL — single integrated unit
+           ═══════════════════════════════════════ */
+        .console-wrap {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 28px 24px 20px;
+        }
+
+        .console-panel {
+            width: 100%;
+            max-width: 1060px;
+            display: flex;
+            /* soft sculpted surface via layered gradients */
+            background:
+                linear-gradient(168deg, rgba(255, 253, 248, 0.8) 0%, rgba(250, 247, 240, 0.95) 50%, rgba(245, 242, 235, 1) 100%),
+                linear-gradient(90deg, var(--panel-bg) 0%, var(--panel-alt) 50%, var(--panel-bg) 100%);
+            border: 1px solid var(--divider);
+            border-radius: 14px;
+            box-shadow: var(--shadow-deep);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ─── Editor half ─── */
+        .editor-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .side-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--brass-dim);
+            padding: 14px 22px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .side-label .label-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--brass);
+            opacity: 0.7;
+        }
+
+        #codeInput {
+            flex: 1;
+            width: 100%;
+            min-height: 370px;
+            background: transparent;
+            color: var(--text-dark);
+            border: none;
+            outline: none;
+            padding: 4px 22px 22px;
+            font-family: 'IBM Plex Mono', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.75;
+            resize: none;
+            tab-size: 4;
+        }
+
+        #codeInput::placeholder {
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* ─── Central divider — sculpted ridge ─── */
+        .panel-divider {
+            width: 1px;
+            background: linear-gradient(
+                180deg,
+                transparent 0%,
+                var(--divider) 15%,
+                rgba(201, 168, 76, 0.12) 50%,
+                var(--divider) 85%,
+                transparent 100%
+            );
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .panel-divider::after {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(
+                180deg,
+                transparent 0%,
+                rgba(0,0,0,0.01) 30%,
+                rgba(0,0,0,0.02) 50%,
+                rgba(0,0,0,0.01) 70%,
+                transparent 100%
+            );
+        }
+
+        /* ─── Output half ─── */
+        .output-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .output-label-row {
+            padding: 14px 22px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--brass-dim);
+        }
+
+        /* ── Status badge with pulsing dot ── */
+        .status-pill {
+            display: none;
+            align-items: center;
+            gap: 7px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            padding: 4px 12px 4px 10px;
+            border-radius: 999px;
+        }
+
+        .status-pill.ready {
+            display: inline-flex;
+            color: var(--green-dot);
+            background: rgba(47, 158, 90, 0.08);
+            border: 1px solid rgba(47, 158, 90, 0.18);
+        }
+
+        .status-pill.ready .pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green-dot);
+            animation: softPulse 2.5s ease-in-out infinite;
+        }
+
+        .status-pill.errored {
+            display: inline-flex;
+            color: var(--red-soft);
+            background: rgba(196, 77, 82, 0.06);
+            border: 1px solid rgba(196, 77, 82, 0.15);
+        }
+
+        .status-pill.errored .pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--red-soft);
+        }
+
+        @keyframes softPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(47, 158, 90, 0.3); }
+            50% { opacity: 0.5; box-shadow: 0 0 6px 2px rgba(47, 158, 90, 0.15); }
+        }
+
+        #outputArea {
+            flex: 1;
+            padding: 4px 22px 22px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13.5px;
+            line-height: 1.75;
+            color: var(--text-output);
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+            min-height: 370px;
+        }
+
+        #outputArea .ghost {
+            color: var(--text-dim);
+            font-family: 'DM Sans', sans-serif;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        /* ═══════════════════════════════════════
+           TOOLBAR — below the console panel
+           ═══════════════════════════════════════ */
+        .toolbar-wrap {
+            display: flex;
+            justify-content: center;
+            padding: 0 24px;
+        }
+
+        .toolbar {
+            width: 100%;
+            max-width: 1060px;
+            padding: 16px 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* ── Run button — physical, textured ── */
+        #runBtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 28px;
+            /* warm textured surface */
+            background: linear-gradient(180deg, #3d3830 0%, #342f28 50%, #2c2822 100%);
+            color: #f5f0e8;
+            border: 1px solid rgba(139, 115, 50, 0.3);
+            border-bottom-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow:
+                0 2px 8px rgba(40, 30, 10, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        #runBtn:hover:not(:disabled) {
+            background: linear-gradient(180deg, #4a4438 0%, #3d3830 50%, #342f28 100%);
+            border-color: rgba(139, 115, 50, 0.5);
+            box-shadow:
+                0 4px 16px rgba(40, 30, 10, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        #runBtn:hover:not(:disabled) .btn-icon {
+            color: var(--teal);
+        }
+
+        #runBtn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow:
+                0 1px 4px rgba(40, 30, 10, 0.3),
+                inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #runBtn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .btn-icon {
+            font-size: 12px;
+            color: var(--brass);
+            transition: color 0.2s;
+        }
+
+        .toolbar-status {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .toolbar-status.running { color: var(--brass); }
+        .toolbar-status.done { color: var(--teal-dim); }
+        .toolbar-status.fail { color: var(--red-soft); }
+
+        /* Ctrl+Enter hint */
+        .shortcut-hint {
+            margin-left: auto;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            opacity: 0.6;
+        }
+
+        .shortcut-hint kbd {
+            background: var(--surface-raised);
+            border: 1px solid var(--divider);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: var(--text-body);
+        }
+
+        /* ── Spinner ── */
+        .spin {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(139, 115, 50, 0.2);
+            border-top-color: var(--brass);
+            border-radius: 50%;
+            animation: revolve 0.65s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes revolve {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ═══════════════════════════════════════
+           FOOTER — textured separator, two sections
+           ═══════════════════════════════════════ */
+        .footer-separator {
+            max-width: 1060px;
+            margin: 24px auto 0;
+            padding: 0 24px;
+            width: 100%;
+        }
+
+        .footer-separator .dot-line {
+            height: 1px;
+            /* dot-grid illusion via repeating gradient */
+            background: repeating-linear-gradient(
+                90deg,
+                var(--divider) 0px,
+                var(--divider) 3px,
+                transparent 3px,
+                transparent 9px
+            );
+            opacity: 0.5;
+        }
+
+        footer {
+            max-width: 1060px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 14px 28px 22px;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11.5px;
+            color: var(--text-dim);
+        }
+
+        footer a {
+            color: var(--brass-dim);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--brass);
+        }
+
+        .footer-right {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════ */
+        @media (max-width: 720px) {
+            .console-panel {
+                flex-direction: column;
+            }
+
+            .panel-divider {
+                width: auto;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    var(--divider) 20%,
+                    rgba(139, 115, 50, 0.12) 50%,
+                    var(--divider) 80%,
+                    transparent 100%
+                );
+            }
+
+            .panel-divider::after {
+                display: none;
+            }
+
+            .shortcut-hint {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ════ HEADER ════ -->
+    <header>
+        <svg class="brand-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- beaker body -->
+            <path d="M12 8 L12 18 L8 30 Q7 33 10 34 L26 34 Q29 33 28 30 L24 18 L24 8"
+                  stroke="#8b7332" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- beaker rim -->
+            <line x1="10" y1="8" x2="26" y2="8" stroke="#8b7332" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- liquid level -->
+            <path d="M10 26 Q14 24 18 26 Q22 28 26 26" stroke="#1a8a74" stroke-width="1" fill="none" opacity="0.6"/>
+            <!-- bracket { -->
+            <text x="14" y="22" font-family="IBM Plex Mono, monospace" font-size="9" font-weight="600" fill="#8b7332" opacity="0.8">{</text>
+            <!-- bracket } -->
+            <text x="20" y="22" font-family="IBM Plex Mono, monospace" font-size="9" font-weight="600" fill="#1a8a74" opacity="0.8">}</text>
+        </svg>
+        <div class="brand-name">execute <span>your code</span></div>
+        <span class="header-tag">// python console</span>
+        <div class="header-spacer"></div>
+        <span class="header-lang">Python 3</span>
+    </header>
+
+    <!-- ════ CONSOLE ════ -->
+    <div class="console-wrap">
+        <div class="console-panel">
+            <!-- Editor side -->
+            <div class="editor-side">
+                <div class="side-label">
+                    <span class="label-dot"></span>
+                    Source
+                </div>
+                <textarea id="codeInput" spellcheck="false"
+                    placeholder="# write something and hit run...&#10;print('hello, world')"></textarea>
+            </div>
+
+            <!-- Central divider -->
+            <div class="panel-divider"></div>
+
+            <!-- Output side -->
+            <div class="output-side">
+                <div class="output-label-row">
+                    <span class="output-label">Output</span>
+                    <span id="statusPill" class="status-pill">
+                        <span class="pill-dot"></span>
+                        <span id="statusText">RESULTS ARE READY.</span>
+                    </span>
+                </div>
+                <div id="outputArea">
+                    <span class="ghost">Your output will appear here after you run your code.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ TOOLBAR ════ -->
+    <div class="toolbar-wrap">
+        <div class="toolbar">
+            <button id="runBtn">
+                <span class="btn-icon">▶</span> Run Code
+            </button>
+            <span id="toolbarStatus" class="toolbar-status"></span>
+            <span class="shortcut-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+        </div>
+    </div>
+
+    <!-- ════ FOOTER ════ -->
+    <div class="footer-separator"><div class="dot-line"></div></div>
+    <footer>
+        <div>Made by <a href="https://github.com/adiancodes" target="_blank" rel="noopener">github.com/adiancodes</a></div>
+        <div class="footer-right">© 2026</div>
+    </footer>
+
+    <!-- ════ SCRIPT ════ -->
+    <script>
+        const codeInput = document.getElementById('codeInput');
+        const runBtn = document.getElementById('runBtn');
+        const statusPill = document.getElementById('statusPill');
+        const statusTextEl = document.getElementById('statusText');
+        const toolbarStatus = document.getElementById('toolbarStatus');
+        const outputArea = document.getElementById('outputArea');
+
+        // Tab key inserts spaces
+        codeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const s = codeInput.selectionStart;
+                const end = codeInput.selectionEnd;
+                codeInput.value = codeInput.value.substring(0, s) + '    ' + codeInput.value.substring(end);
+                codeInput.selectionStart = codeInput.selectionEnd = s + 4;
+            }
+        });
+
+        // Ctrl+Enter shortcut
+        codeInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runBtn.click();
+            }
+        });
+
+        // Run handler
+        runBtn.addEventListener('click', async () => {
+            const sourceCode = codeInput.value.trim();
+            if (!sourceCode) {
+                outputArea.innerHTML = '<span class="ghost">Write some code first, then press Run.</span>';
+                return;
+            }
+
+            // Loading state
+            runBtn.disabled = true;
+            runBtn.innerHTML = '<span class="spin"></span> Running…';
+            toolbarStatus.textContent = 'executing…';
+            toolbarStatus.className = 'toolbar-status running';
+            statusPill.className = 'status-pill';
+            statusPill.style.display = 'none';
+            outputArea.innerHTML = '<span class="ghost">⏳ Running your code…</span>';
+
+            try {
+                const res = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        problemId: 'playground',
+                        sourceCode: sourceCode,
+                        language: 'python'
+                    })
+                });
+
+                const data = await res.json();
+
+                // Show output
+                if (data.output && data.output.length > 0) {
+                    outputArea.textContent = data.output;
+                } else {
+                    outputArea.innerHTML = '<span class="ghost">Program finished — no output produced.</span>';
+                }
+
+                // Update status
+                if (data.status === 'COMPLETED') {
+                    statusPill.className = 'status-pill ready';
+                    statusTextEl.textContent = 'RESULTS ARE READY.';
+                    toolbarStatus.textContent = 'done';
+                    toolbarStatus.className = 'toolbar-status done';
+                } else {
+                    statusPill.className = 'status-pill errored';
+                    statusTextEl.textContent = 'SOMETHING WENT WRONG.';
+                    toolbarStatus.textContent = 'failed';
+                    toolbarStatus.className = 'toolbar-status fail';
+                }
+
+            } catch (err) {
+                outputArea.textContent = 'Could not reach the server.\n' + err.message;
+                statusPill.className = 'status-pill errored';
+                statusTextEl.textContent = 'CONNECTION LOST.';
+                toolbarStatus.textContent = 'error';
+                toolbarStatus.className = 'toolbar-status fail';
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerHTML = '<span class="btn-icon">▶</span> Run Code';
+            }
+        });
+    </script>
+</body>
+</html>
