@@ -16,9 +16,11 @@ The frontend picks up the response and displays the output in the right panel, a
 
 ## Screenshots
 
-<!-- Add a screenshot of the main interface here -->
+<img width="1901" height="967" alt="Screenshot 2026-06-08 183559" src="https://github.com/user-attachments/assets/eff23572-de4e-4e35-8cab-a720ad5ddefc" />
 
-<!-- Add a screenshot showing a code execution result here -->
+
+<img width="1878" height="970" alt="Screenshot 2026-06-08 183815" src="https://github.com/user-attachments/assets/9872b9f1-3090-4cf0-9c78-3240ef08e6cc" />
+
 
 
 ## Requirements
@@ -59,4 +61,4 @@ Retrieves a past submission by its ID. The submissions are stored in memory, so 
 
 ## Stack
 
-Spring Boot 3.1 handles the backend and serves the static frontend. There is no database. The frontend is plain HTML, CSS, and JavaScript with no frameworks. Code execution happens through Java's `ProcessBuilder` calling the system Python interpreter directly.
+Spring Boot 3.1 handles the backend and serves the static frontend. There is no database. The frontend is plain HTML, CSS, and JavaScript with no frameworks. Code execution happens through Java's `ProcessBuilder` calling the system Python interpreter directly.
